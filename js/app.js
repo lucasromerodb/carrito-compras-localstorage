@@ -11,6 +11,7 @@ function eventListeners() {
   courses.addEventListener('click', selectCourse);
   coursesList.addEventListener('click', removeCourseFromCart);
   emptyCart.addEventListener('click', emptyCoursesCart);
+  document.addEventListener('DOMContentLoaded', getCoursesFromLocalStorageOnLoad);
 }
 
 // funciones
@@ -20,9 +21,9 @@ function selectCourse(e) {
   // Delegation
   if (e.target.classList.contains('agregar-carrito')) {
     const course = e.target.parentElement.parentElement;
-    console.log(course);
     readDataCourse(course);
   }
+
 }
 
 function readDataCourse(course) {
@@ -36,7 +37,7 @@ function readDataCourse(course) {
   addToCart(courseInfo)
 }
 
-function addToCart(cartCourse) {
+function templateConstructor(cartCourse) {
   const row = document.createElement('tr');
 
   row.innerHTML = `
@@ -52,12 +53,27 @@ function addToCart(cartCourse) {
 
   coursesList.appendChild(row);
 }
+function addToCart(cartCourse) {
+  templateConstructor(cartCourse);
+  saveCourseLocalStorage(cartCourse);
+}
 
 function removeCourseFromCart(e) {
   e.preventDefault();
   if (e.target.classList.contains('borrar-curso')) {
     e.target.parentElement.parentElement.remove();
+    removeCourseFromCartFromLocalStorage(e);
   }
+}
+
+function removeCourseFromCartFromLocalStorage(e) {
+  let coursesLS;
+
+  coursesLS = getCoursesFromLocalStorage();
+
+  coursesLS.forEach(function (xs) {
+    templateConstructor(xs);
+  });
 }
 
 function emptyCoursesCart(e) {
@@ -66,5 +82,41 @@ function emptyCoursesCart(e) {
   while (coursesList.firstChild) {
     coursesList.removeChild(coursesList.firstChild);
   }
-  return false;
+  // return false;
+  emptyCourseCartFromLocalStorage();
+}
+
+function emptyCourseCartFromLocalStorage() {
+  localStorage.clear();
+}
+
+function saveCourseLocalStorage(cartCourse) {
+  let courses;
+
+  courses = getCoursesFromLocalStorage();
+
+  courses.push(cartCourse);
+  localStorage.setItem('courses', JSON.stringify(courses));
+
+}
+
+function getCoursesFromLocalStorage() {
+  let coursesLS;
+  if (localStorage.getItem('courses') === null) {
+    coursesLS = [];
+  } else {
+    coursesLS = JSON.parse(localStorage.getItem('courses'));
+  }
+  console.log(coursesLS);
+  return coursesLS;
+}
+
+function getCoursesFromLocalStorageOnLoad() {
+  let coursesLS;
+
+  coursesLS = getCoursesFromLocalStorage();
+
+  coursesLS.forEach(function (course) {
+    templateConstructor(course);
+  });
 }
