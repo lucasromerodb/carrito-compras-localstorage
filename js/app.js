@@ -60,20 +60,27 @@ function addToCart(cartCourse) {
 
 function removeCourseFromCart(e) {
   e.preventDefault();
+  let course = e.target.parentElement.parentElement;
+  let courseId;
   if (e.target.classList.contains('borrar-curso')) {
     e.target.parentElement.parentElement.remove();
-    removeCourseFromCartFromLocalStorage(e);
+    courseId = course.querySelector('a').getAttribute('data-id');
+    removeCourseFromCartFromLocalStorage(courseId);
   }
 }
 
-function removeCourseFromCartFromLocalStorage(e) {
+function removeCourseFromCartFromLocalStorage(courseId) {
   let coursesLS;
 
   coursesLS = getCoursesFromLocalStorage();
 
-  coursesLS.forEach(function (xs) {
-    templateConstructor(xs);
+  coursesLS.forEach(function (course, i) {
+    if (course.id === courseId) {
+      coursesLS.splice(i, 1);
+    }
   });
+
+  localStorage.setItem('courses', JSON.stringify(coursesLS));
 }
 
 function emptyCoursesCart(e) {
